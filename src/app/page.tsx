@@ -44,23 +44,96 @@ function AnimatedNumber({ value }: { value: number }) {
   return <span ref={ref}>{count}</span>;
 }
 
-function StaticHeroOrb() {
+function MobileRobot() {
+  const [headRotation, setHeadRotation] = useState({ x: 0, y: 0 });
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const { clientX, clientY } = e;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    // Normalize coordinates
+    const normalizedX = (clientX - centerX) / centerX;
+    const normalizedY = (clientY - centerY) / centerY;
+
+    setHeadRotation({
+      x: normalizedY * -25, // Up/Down rotation limit
+      y: normalizedX * 35,  // Left/Right rotation limit
+    });
+  };
+
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 pointer-events-none flex items-center justify-center">
-      {/* Outer Glow */}
-      <motion.div 
-        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0 bg-[#00a1e0] rounded-full blur-[60px]"
-      />
-      {/* Inner Core */}
-      <motion.div 
-        animate={{ y: [-10, 10, -10] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="relative w-48 h-48 bg-gradient-to-br from-white via-[#00d4ff] to-purple-500 rounded-full shadow-[0_0_50px_rgba(0,212,255,0.8)] border border-white/20 mix-blend-screen"
+    <div 
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm aspect-square pointer-events-auto flex flex-col items-center justify-center touch-none z-10"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={() => setHeadRotation({ x: 0, y: 0 })}
+    >
+      <motion.div
+        animate={{ rotateX: headRotation.x, rotateY: headRotation.y }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        style={{ perspective: 1000 }}
+        className="relative w-48 h-48 sm:w-56 sm:h-56 cursor-pointer"
       >
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 rounded-full mix-blend-overlay"></div>
+        {/* Robot Head Main Body */}
+        <div className="w-full h-full bg-gradient-to-b from-slate-800 to-black rounded-[2.5rem] border-2 border-[#00a1e0]/80 shadow-[0_0_40px_rgba(0,161,224,0.3)] flex flex-col items-center justify-center p-6 relative overflow-hidden backdrop-blur-xl">
+          
+          {/* Glass glare effect */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
+
+          {/* Antenna */}
+          <div className="absolute -top-4 shadow-xl left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <motion.div 
+               animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+               transition={{ duration: 1.5, repeat: Infinity }}
+               className="w-4 h-4 bg-red-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,1)] z-10" 
+            />
+            <div className="w-1.5 h-6 bg-slate-400"></div>
+          </div>
+
+          {/* Eyes Visor */}
+          <div className="w-full h-16 bg-black/80 rounded-2xl mt-4 px-4 flex items-center justify-center gap-6 border border-white/10 shadow-inner overflow-hidden relative">
+            {/* Scanning line indicator */}
+            <motion.div 
+               animate={{ x: ["-200%", "200%"] }}
+               transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+               className="absolute top-0 bottom-0 w-12 bg-gradient-to-r from-transparent via-[#00a1e0]/20 to-transparent skew-x-12"
+            />
+            
+            {/* Left Eye */}
+            <motion.div 
+              animate={{ height: ["16px", "2px", "16px"], scale: [1, 1.1, 1] }} 
+              transition={{ duration: 4, repeat: Infinity, times: [0, 0.05, 0.1] }} 
+              className="w-8 h-4 bg-[#00d4ff] rounded-full shadow-[0_0_15px_rgba(0,212,255,0.9)]" 
+            />
+            {/* Right Eye */}
+            <motion.div 
+              animate={{ height: ["16px", "2px", "16px"], scale: [1, 1.1, 1] }} 
+              transition={{ duration: 4, repeat: Infinity, times: [0, 0.05, 0.1] }}
+              className="w-8 h-4 bg-[#00d4ff] rounded-full shadow-[0_0_15px_rgba(0,212,255,0.9)]" 
+            />
+          </div>
+
+          {/* Audio Wave / Voice Box */}
+          <div className="mt-auto mb-2 flex items-center justify-center gap-1.5">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <motion.div 
+                key={i}
+                animate={{ height: [6, Math.random() * 16 + 6, 6] }}
+                transition={{ duration: Math.random() * 0.5 + 0.5, repeat: Infinity }}
+                className="w-1.5 bg-gradient-to-t from-[#00a1e0] border-t border-[#00d4ff] to-transparent rounded-full" 
+              />
+            ))}
+          </div>
+
+        </div>
       </motion.div>
+      <motion.p 
+         animate={{ opacity: [0.5, 1, 0.5] }}
+         transition={{ duration: 2, repeat: Infinity }}
+         className="absolute -bottom-12 text-sm text-[#00a1e0] font-mono tracking-[0.2em] text-center w-full bg-black/50 py-1 rounded-full backdrop-blur-md"
+      >
+        TOUCH TO MOVE
+      </motion.p>
     </div>
   );
 }
@@ -89,7 +162,7 @@ export default function LandingPage() {
         {!isMobile ? (
           <SplineScene /> 
         ) : (
-          <StaticHeroOrb />
+          <MobileRobot />
         )}
 
         <div className="relative z-10 flex flex-col items-center text-center px-4 w-full max-w-5xl mx-auto pointer-events-none">
