@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sfmc-blue: #00a1e0;
+  --color-sfmc-dark: #032e61;
+  --color-sfmc-neon: #00d4ff;
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-outfit);
+}
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+  }
+  .glass-card {
+    @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-xl;
+  }
+  .glass-input {
+    @apply bg-white/5 border border-white/10 rounded-xl focus:border-[#00a1e0] focus:ring-1 focus:ring-[#00a1e0] focus:outline-none transition-all duration-300 text-white placeholder:text-gray-500;
+  }
+  .neon-text-blue {
+    text-shadow: 0 0 10px rgba(0, 161, 224, 0.5), 0 0 20px rgba(0, 161, 224, 0.3);
+  }
+  .neon-text-white {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  .glow-button {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+  .glow-button::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full w-[200%] transition-transform duration-700 ease-in-out;
+  }
+  .glow-button:hover::before {
+    @apply translate-x-full;
+  }
+}
+
+/* Custom animated background pattern */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
