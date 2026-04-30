@@ -157,6 +157,54 @@ function AnimatedNumber({ value }: { value: number }) {
   return <span ref={ref}>{count}</span>;
 }
 
+// ─── Event Countdown Timer ──────────────────────────────────────────
+function EventCountdown({ targetDate }: { targetDate: string }) {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const calculateTimeLeft = () => {
+      const difference = +new Date(targetDate) - +new Date();
+      if (difference <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (!mounted) return <div className="flex gap-4 opacity-0"><div className="w-16 h-16"/><div className="w-16 h-16"/><div className="w-16 h-16"/><div className="w-16 h-16"/></div>;
+
+  return (
+    <div className="flex gap-3 sm:gap-4">
+      {[
+        { label: "Days", value: timeLeft.days },
+        { label: "Hours", value: timeLeft.hours },
+        { label: "Mins", value: timeLeft.minutes },
+        { label: "Secs", value: timeLeft.seconds },
+      ].map((item, idx) => (
+        <div key={idx} className="flex flex-col items-center">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl sm:text-2xl font-bold font-display shadow-inner backdrop-blur-md">
+            {item.value.toString().padStart(2, "0")}
+          </div>
+          <span className="text-[10px] sm:text-xs text-gray-500 mt-2 uppercase tracking-widest font-semibold">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Member type ────────────────────────────────────────────────────
 type Member = {
   id: string;
@@ -224,12 +272,15 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="text-center text-lg sm:text-xl md:text-2xl text-gray-400 max-w-2xl font-light mb-10 leading-relaxed"
+          className="text-center text-lg sm:text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto font-light mb-10 leading-relaxed"
         >
           Connect. Learn. Grow together.
           <br className="hidden sm:block" />
           <span className="text-gray-500">
             The ultimate Trailblazer networking event in Mumbai.
+          </span>
+          <span className="block mt-6 text-[#00a1e0] font-semibold text-sm md:text-base tracking-wide bg-[#00a1e0]/10 border border-[#00a1e0]/20 rounded-full px-6 py-2.5 w-fit mx-auto shadow-[0_0_20px_rgba(0,161,224,0.15)] backdrop-blur-md">
+            📅 2 May 2026 &nbsp;|&nbsp; ⏰ 9:30 AM – 2:30 PM
           </span>
         </motion.p>
 
@@ -273,67 +324,81 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2: EVENT CTA
+          SECTION 2: EVENT DETAILS & CTA
       ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 max-w-4xl mx-auto px-4 py-16">
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16 space-y-8">
+        
+        {/* Countdown & CTA Card */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden"
+          className="rounded-3xl p-8 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden"
         >
           <div className="absolute top-0 left-0 w-64 h-64 bg-[#00a1e0]/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="space-y-4 text-center md:text-left flex-1 relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold">Ready to drop in?</h2>
-            <p className="text-gray-400 leading-relaxed">
-              Scan the QR code at the venue or register directly right here to claim your digital badge and skip the queue.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2 justify-center md:justify-start">
-              <div className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <Calendar className="w-4 h-4 text-[#00a1e0]" /> Oct 24, 2026
+          <div className="space-y-6 text-center lg:text-left flex-1 relative z-10">
+            <div>
+              <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 uppercase tracking-widest mb-4">
+                Save the Date
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <MapPin className="w-4 h-4 text-[#00a1e0]" /> Next School, Mulund West
-              </div>
+              <h2 className="text-3xl md:text-4xl font-bold">Ready to drop in?</h2>
+              <p className="text-gray-400 leading-relaxed mt-2 max-w-lg mx-auto lg:mx-0">
+                Scan the QR code at the venue or register directly right here to claim your digital badge and skip the queue.
+              </p>
+            </div>
+            
+            <div className="flex justify-center lg:justify-start">
+              <EventCountdown targetDate="2026-05-02T09:30:00" />
             </div>
           </div>
-          <div className="w-full md:w-auto relative z-10">
+          <div className="w-full lg:w-auto relative z-10 flex flex-col items-center gap-4">
             <Link href="/register">
-              <button className="w-full md:w-auto group flex items-center justify-center gap-3 bg-white text-black px-10 py-5 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all duration-300">
+              <button className="w-full sm:w-auto group flex items-center justify-center gap-3 bg-white text-black px-10 py-5 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all duration-300">
                 Check In Now
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
           </div>
         </motion.div>
-      </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2.5: LOCATION
-      ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16">
+        {/* Location & Time details */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           className="rounded-3xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-xl overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]"
         >
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a1e0]/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
           
           <div className="flex flex-col lg:flex-row">
             <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-sm font-semibold mb-6 w-fit">
-                <MapPin className="w-4 h-4" />
-                <span>Event Location 📍</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-sm font-semibold mb-8 w-fit">
+                <Calendar className="w-4 h-4" />
+                <span>Event Details</span>
               </div>
               
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Next School</h2>
-              <div className="text-gray-400 space-y-1 mb-8 text-lg font-light">
-                <p>Near Park Road, Off Devi Dayal Rd,</p>
-                <p>Gavane Pada, Mulund West,</p>
-                <p>Mumbai, Maharashtra 400080</p>
+              <div className="space-y-6 mb-10">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
+                    <Calendar className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Date & Time</h3>
+                    <p className="text-gray-400 mt-1">2 May 2026<br/>9:30 AM – 2:30 PM</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
+                    <MapPin className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Venue Location</h3>
+                    <p className="text-gray-400 mt-1">Next School<br/>Near Park Road, Off Devi Dayal Rd,<br/>Gavane Pada, Mulund West,<br/>Mumbai, Maharashtra 400080</p>
+                  </div>
+                </div>
               </div>
               
               <a 
@@ -342,6 +407,7 @@ export default function LandingPage() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#00a1e0] to-[#0077b5] text-white px-8 py-4 rounded-full font-bold text-lg shadow-[0_0_20px_rgba(0,161,224,0.3)] hover:shadow-[0_0_40px_rgba(0,161,224,0.5)] transition-all duration-300 w-full sm:w-auto hover:-translate-y-1"
               >
+                <MapPin className="w-5 h-5" />
                 Open in Google Maps
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
