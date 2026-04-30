@@ -17,6 +17,16 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
+interface Particle {
+  id: number;
+  left: string;
+  top: string;
+  size: number;
+  duration: number;
+  delay: number;
+  color: string;
+}
+
 // ─── Particle Field with Mouse Parallax ─────────────────────────────
 function ParticleField() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,8 +34,9 @@ function ParticleField() {
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
     const handleResize = () => setIsMobile(window.innerWidth < 768);
+    // Use requestAnimationFrame to avoid calling setState synchronously during effect
+    requestAnimationFrame(handleResize);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -45,22 +56,28 @@ function ParticleField() {
   const particleCount = isMobile ? 12 : 30;
 
   // Generate stable particle configs
-  const particles = useRef(
-    Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      size: Math.random() * 2.5 + 1.5,
-      duration: Math.random() * 15 + 15,
-      delay: Math.random() * 10,
-      color:
-        i % 3 === 0
-          ? "rgba(0, 161, 224, 0.4)"
-          : i % 3 === 1
-          ? "rgba(139, 92, 246, 0.35)"
-          : "rgba(255, 255, 255, 0.25)",
-    }))
-  ).current;
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setParticles(
+        Array.from({ length: 40 }, (_, i) => ({
+          id: i,
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          size: Math.random() * 2.5 + 1.5,
+          duration: Math.random() * 15 + 15,
+          delay: Math.random() * 10,
+          color:
+            i % 3 === 0
+              ? "rgba(0, 161, 224, 0.4)"
+              : i % 3 === 1
+              ? "rgba(139, 92, 246, 0.35)"
+              : "rgba(255, 255, 255, 0.25)",
+        }))
+      );
+    });
+  }, []);
 
   return (
     <div
@@ -277,7 +294,7 @@ export default function LandingPage() {
                 <Calendar className="w-4 h-4 text-[#00a1e0]" /> Oct 24, 2026
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <MapPin className="w-4 h-4 text-[#00a1e0]" /> Jio World Convention
+                <MapPin className="w-4 h-4 text-[#00a1e0]" /> Next School, Mulund West
               </div>
             </div>
           </div>
@@ -288,6 +305,61 @@ export default function LandingPage() {
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 2.5: LOCATION
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="rounded-3xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-xl overflow-hidden relative shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]"
+        >
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a1e0]/5 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row">
+            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00a1e0]/10 border border-[#00a1e0]/20 text-[#00a1e0] text-sm font-semibold mb-6 w-fit">
+                <MapPin className="w-4 h-4" />
+                <span>Event Location 📍</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Next School</h2>
+              <div className="text-gray-400 space-y-1 mb-8 text-lg font-light">
+                <p>Near Park Road, Off Devi Dayal Rd,</p>
+                <p>Gavane Pada, Mulund West,</p>
+                <p>Mumbai, Maharashtra 400080</p>
+              </div>
+              
+              <a 
+                href="https://www.google.com/maps/dir//Next+School,+Near,+Park+Road,+Off,+Devi+Dayal+Rd,+Gavane+Pada,+Mulund+West,+Mumbai,+Maharashtra+400080/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-[#00a1e0] to-[#0077b5] text-white px-8 py-4 rounded-full font-bold text-lg shadow-[0_0_20px_rgba(0,161,224,0.3)] hover:shadow-[0_0_40px_rgba(0,161,224,0.5)] transition-all duration-300 w-full sm:w-auto hover:-translate-y-1"
+              >
+                Open in Google Maps
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+            
+            <div className="flex-1 lg:border-l border-white/[0.07] bg-white/[0.01] relative min-h-[350px] lg:min-h-[400px]">
+              <iframe 
+                src="https://maps.google.com/maps?q=Next%20School,%20Gavane%20Pada,%20Mulund%20West,%20Mumbai&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) opacity(0.8) contrast(1.1) grayscale(0.5)" }}
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10" />
+            </div>
           </div>
         </motion.div>
       </section>
@@ -414,27 +486,104 @@ export default function LandingPage() {
           <p className="text-gray-400">Learn from the top minds powering the Salesforce ecosystem.</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto gap-6">
           {[
-            { name: "Sarah Connor", role: "Global Marketing Cloud Architect", emoji: "👩‍💼" },
-            { name: "David Chen", role: "VP of Digital Engineering", emoji: "👨‍💻" },
-            { name: "Priya Sharma", role: "Lead DevRel", emoji: "👩‍💻" },
+            { name: "Saleem Shaikh", role: "Salesforce DevOps Engineer @ TCS", linkedin: "https://www.linkedin.com/in/thesaleemshaikh/", emoji: "👨‍💻" },
+            { name: "Jitendra “Jacky” Bafna", role: "MuleSoft / Salesforce Expert", linkedin: "https://www.linkedin.com/in/jitendra-bafna-jacky/", emoji: "👨‍💼" },
           ].map((speaker, idx) => (
             <motion.div key={idx} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1, duration: 0.5 }}
-              className="group p-8 rounded-2xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-md hover:border-[#00a1e0]/30 hover:bg-white/[0.06] transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden">
+              className="group p-8 rounded-2xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-md hover:border-[#00a1e0]/30 hover:bg-white/[0.06] hover:shadow-[0_0_30px_rgba(0,161,224,0.15)] transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/0 group-hover:bg-[#00a1e0]/10 blur-3xl transition-colors duration-500 pointer-events-none" />
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10 flex items-center justify-center text-4xl mb-5 group-hover:scale-110 transition-transform duration-300 shadow-xl">
                 {speaker.emoji}
               </div>
               <h3 className="text-xl font-bold">{speaker.name}</h3>
-              <p className="text-sm text-[#00a1e0] mt-1 font-medium">{speaker.role}</p>
+              <p className="text-sm text-[#00a1e0] mt-1 font-medium mb-5">{speaker.role}</p>
+              
+              <a href={speaker.linkedin} target="_blank" rel="noopener noreferrer" className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#0a66c2]/10 hover:bg-[#0a66c2]/20 text-[#5bb5f0] text-sm font-semibold transition-all border border-[#0a66c2]/20 hover:border-[#0a66c2]/40">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+                View LinkedIn
+              </a>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 6: SOCIAL LINKS / FOOTER
+          SECTION 6: PANELISTS
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-20 bg-gradient-to-b from-transparent to-white/[0.02]">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-3">Community Panelists</h2>
+          <p className="text-gray-400">Hear from leading experts in the Salesforce ecosystem.</p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          {[
+            { name: "Aman Tiwari", linkedin: "https://www.linkedin.com/in/aman-tiwari-sfdc/" },
+            { name: "Aniket Kohale", linkedin: "https://www.linkedin.com/in/aniketkohale66/" },
+            { name: "Balachander Sheetiyar", linkedin: "https://www.linkedin.com/in/balachander-sheetiyar-299a56168/" },
+            { name: "Charmy G", linkedin: "https://www.linkedin.com/in/charmy-g/" },
+            { name: "Roshan (Mir Roshan)", linkedin: "https://www.linkedin.com/in/mir-roshan-mir-niyaz-ali-zaidi/" },
+            { name: "Meghesh Shenoy", linkedin: "https://www.linkedin.com/in/megheshshenoy3/" },
+          ].map((panelist, idx) => (
+            <motion.div key={idx} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: idx * 0.05, duration: 0.4 }}
+              className="group p-5 rounded-xl border border-white/[0.05] bg-white/[0.02] backdrop-blur-sm hover:border-purple-500/30 hover:bg-white/[0.04] transition-all duration-300 flex items-center gap-4 relative overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/10 flex items-center justify-center font-bold text-white shrink-0 group-hover:scale-110 transition-transform">
+                {panelist.name.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold truncate text-white group-hover:text-purple-300 transition-colors">{panelist.name}</h3>
+                <p className="text-xs text-gray-500 truncate mt-0.5">Panelist – SFMC Mumbai</p>
+              </div>
+              <a href={panelist.linkedin} target="_blank" rel="noopener noreferrer" title="Connect on LinkedIn" className="w-10 h-10 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#5bb5f0] hover:bg-[#0a66c2] hover:text-white transition-all shrink-0">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 7: JOIN THE COMMUNITY
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 max-w-4xl mx-auto px-4 py-20">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+          className="rounded-3xl p-8 md:p-14 text-center border border-white/10 bg-gradient-to-br from-[#00a1e0]/10 via-[#030818] to-purple-900/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,161,224,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[#00a1e0]/5 blur-[120px] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Join the Community</h2>
+            <p className="text-gray-300 md:text-lg mb-10 max-w-2xl mx-auto">
+              Stay connected, share knowledge, and grow your network with fellow Trailblazers in Mumbai. Be part of our growing family!
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-5 justify-center">
+              <a href="https://chat.whatsapp.com/B9hTjRnQeUU6S5n0OuiJwk" target="_blank" rel="noopener noreferrer"
+                className="group flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1DA851] text-white px-8 py-4 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(37,211,102,0.3)] hover:shadow-[0_0_50px_rgba(37,211,102,0.5)] hover:scale-[1.02] transition-all duration-300">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                WhatsApp Group
+              </a>
+              <a href="https://www.linkedin.com/company/sfmc-mumbai/" target="_blank" rel="noopener noreferrer"
+                className="group flex items-center justify-center gap-3 bg-[#0a66c2] hover:bg-[#084e96] text-white px-8 py-4 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(10,102,194,0.3)] hover:shadow-[0_0_50px_rgba(10,102,194,0.5)] hover:scale-[1.02] transition-all duration-300">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+                LinkedIn Page
+              </a>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 8: SOCIAL LINKS / FOOTER
       ═══════════════════════════════════════════════════════════════ */}
       <footer className="relative z-10 max-w-5xl mx-auto px-4 py-16 border-t border-white/[0.07]">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -453,7 +602,7 @@ export default function LandingPage() {
             <Link href="/admin" className="hover:text-white transition-colors">Admin</Link>
           </div>
           <div className="flex gap-3">
-            <a href="#" className="w-11 h-11 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-[#0077b5] hover:border-transparent transition-all duration-300 group">
+            <a href="https://www.linkedin.com/company/sfmc-mumbai/" target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-[#0077b5] hover:border-transparent transition-all duration-300 group">
               <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
               </svg>
